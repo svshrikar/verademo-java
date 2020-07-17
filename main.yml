@@ -1,0 +1,82 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  semantic-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v1.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        package: [
+          'packages/synapse-apollo-datasource',
+          'services/gateway-api',
+          'services/core-banking-api',
+        ]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Run eslint
+        working-directory: ${{ matrix.package }}
+        run: yarn lint
+
+      - name: Run tests
+        working-directory: ${{ matrix.package }}
+        run: yarn test
+
+      - name: Code coverage
+        uses: romeovs/lcov-reporter-action@v0.2.16
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ${{ matrix.package }}/coverage/lcov.info
+  
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: ZIP files
+        run: zip -r toscan.zip . -x ".git/*" ".github/*" ".gitignore"
+      - name: Release to Github
+        run: echo "Release"
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Download the Pipeline Scanner
+        uses: wei/curl@master
+        with:
+          args: -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
+      - name: Unzip the Pipeline Scanner
+        run: unzip pipeline-scan-LATEST.zip
+      - name: Create Baseline
+        run: java -Dpipeline.debug=true -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --file "toscan.zip" --json_output_file="baseline.json" || true --fail_on_severity="Very High, High" --fail_on_cwe="80"
+      - name: Upload Baseline
+        uses: actions/upload-artifact@v1
+        with:
+          name: baseline
+          path: baseline.json
+ 
