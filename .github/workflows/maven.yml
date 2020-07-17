@@ -52,13 +52,7 @@ jobs:
 
     - name: run scan
 
-      run: java -jar veracode-wrapper.jar -vid ${{secrets.VERACODE_API_ID}} -vkey ${{secrets.VERACODE_API_KEY}}
-
-        -action uploadandscan -appname "Good Money" -filepath "target/verademo.war"
-
-        -createprofile false -version "commit $GITHUB_SHA_SHORT workflow $GITHUB_WORKFLOW run $GITHUB_RUN_ID"
-
-        -sandboxname "github-actions" -createsandbox true -autoscan true
+      run: java -jar veracode-wrapper.jar -vid ${{secrets.VERACODE_API_ID}} -vkey ${{secrets.VERACODE_API_KEY}} -action uploadandscan -appname "Good Money" -filepath "target/verademo.war" -createprofile false -version "commit $GITHUB_SHA_SHORT workflow $GITHUB_WORKFLOW run $GITHUB_RUN_ID -sandboxname "github-actions" -createsandbox true -autoscan true
 
     - name: after
 
