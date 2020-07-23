@@ -10,7 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  baseline:
 
     runs-on: ubuntu-latest
 
@@ -28,7 +28,12 @@ jobs:
           args: -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
     - name: Unzip the Pipeline Scanner
       run: unzip pipeline-scan-LATEST.zip
-    - name: Pipeline Scan
-      run: java -Dpipeline.debug=false -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --file "target/verademo.war" --fail_on_severity="Very High, High" --fail_on_cwe="80" --issue_details true
-    
+    - name: Create Baseline
+      run: java -Dpipeline.debug=false -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --file "target/verademo.war" --json_output_file="baseline.json" || true --fail_on_severity="Very High, High" --fail_on_cwe="80"
+      
+    - name: Upload Baseline
+      uses: actions/upload-artifact@v1
+      with:
+            name: baseline
+            path: baseline.json    
  
