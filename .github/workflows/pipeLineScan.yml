@@ -4,10 +4,11 @@
 name: Build and Pipeline scan
 
 on:
- status
+ status:
+  branch: branch1
     
 jobs:
-  baseline:
+  build:
 
     runs-on: ubuntu-latest
 
