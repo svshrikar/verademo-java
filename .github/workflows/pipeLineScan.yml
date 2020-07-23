@@ -4,8 +4,8 @@
 name: Build and Pipeline scan
 
 on:
- status:
-  branch: branch1
+ push:
+  branches: [branch1]
     
 jobs:
   build:
