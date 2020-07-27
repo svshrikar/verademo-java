@@ -39,7 +39,7 @@ jobs:
       - name: Unzip the Pipeline Scanner
         run: unzip pipeline-scan-LATEST.zip
       - name: Create Baseline
-        run: java -Dpipeline.debug=true -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --file "toscan.zip" --json_output_file="baseline.json" --fail_on_severity="Very High, High" --fail_on_cwe="80" || true 
+        run: java -Dpipeline.debug=true -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --file "target/verademo.war" --json_output_file="baseline.json" --fail_on_severity="Very High, High" --fail_on_cwe="80" || true 
       - name: Upload Baseline
         uses: actions/upload-artifact@v1
         with:
@@ -65,4 +65,4 @@ jobs:
         with:
           name: baseline
       - name: Scan with baseline
-        run: java -Dpipeline.debug=true -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --file "example.jar" --baseline_file "baseline/baseline.json"
+        run: java -Dpipeline.debug=true -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --file "target/verademo.war" --baseline_file "baseline/baseline.json" --fail_on_severity="Very High, High" --fail_on_cwe="80"
